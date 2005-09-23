@@ -1,0 +1,7 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/xls2csv.t
+script/xls2csv
+META.yml                                 Module meta-data (added by MakeMaker)

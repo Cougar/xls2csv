@@ -1,0 +1,205 @@
+#!/usr/bin/perl
+use strict;
+use 5.006;
+
+use utf8;
+use Getopt::Std;
+use Locale::Recode;
+use Spreadsheet::ParseExcel;
+use Spreadsheet::ParseExcel::FmtUnicode;
+use Text::CSV_XS;
+
+our $VERSION = '1.02';
+
+=head1 NAME
+
+xls2csv - Recode a spreadsheet's charset and save as CSV.
+
+=head1 DESCRIPTION
+
+This little script will recode a spreadsheet into a different character set
+and output the recoded data as a csv file.
+
+This script came about after many headaches from dealing with spreadsheets
+from clients that were being received in various character sets.
+
+=head1 OPTIONS
+
+	-x     : filename of the source spreadsheet
+	-b     : the character set the source spreadsheet is in (before)
+	-c     : the filename to save the generated csv file as
+	-a     : the character set the csv file should be converted to (after)
+	-q     : quiet mode
+	-s     : print a list of supported character sets
+	-h     : print help message
+
+=head1 EXAMPLE USAGE
+
+The following example will convert a spreadsheet that is in the WINDOWS-1252 character set (WinLatin1)
+and save it as a csv file in the UTF-8 character set.
+
+	xls2csv -x "1252spreadsheet.xls" -b WINDOWS-1252 -c "ut8csvfile.csv" -a UTF-8
+
+=head1 NOTES
+
+If the csv's charset (-a) is not set, the CSV file will be created using the same charset as the spreadsheet.
+The spreadsheet's charset (-b) will default to UTF-8 if not set.
+
+=head1 REQUIRED MODULES
+
+This script requires the following modules:
+
+	Locale::Recode
+	Unicode::Map
+	Spreadsheet::ParseExcel
+	Text::CSV_XS
+
+=head1 CAVEATS
+
+This only works with single worksheet spreadsheets.
+
+It probably will not work work with spreadsheets that use formulas.
+
+A line is the spreadsheet is assumed to be blank if there is nothing in the first column.
+
+=cut
+
+my %O;
+getopts('x:b:c:a:qsh', \%O);
+HELP_MESSAGE() if !%O or $O{'h'};
+
+if ($O{'s'})
+{
+	print "\nThe following character sets are supported:\n\n";
+	my $Supported = Locale::Recode->getSupported;
+	foreach my $CharSet (sort @$Supported)
+	{
+		print "$CharSet\n";
+	}
+	exit;
+}
+
+my $SourceFilename = $O{'x'} || die "The filename of the spreadsheet (-x) is required.";
+my $SourceCharset = $O{'b'};
+$SourceCharset = 'UTF-8' unless $SourceCharset;
+
+my $DestFilename = $O{'c'} || die "The filename to save the csv file as (-c) is required.";
+my $DestCharset = $O{'a'};
+$DestCharset = 'UTF-8' unless $DestCharset;
+
+unless ($O{'q'})
+{
+	print "Now reading \"$SourceFilename\" as $SourceCharset.\n";
+}
+
+my $IO = new IO::File;
+$IO->open("< $SourceFilename") || die "cannot open spreadsheet: $!";
+my $Formatter = Spreadsheet::ParseExcel::FmtUnicode->new(Unicode_Map => $SourceCharset);
+my $Book = Spreadsheet::ParseExcel::Workbook->Parse($IO, $Formatter) || die "Can't read spreadsheet!";
+my ($Sheet) = @{$Book->{Worksheet}};
+
+open CSV, ">$DestFilename" || die "cannot create csv file: $!" ;
+binmode CSV;
+my $Csv = Text::CSV_XS->new({
+	'quote_char'  => '"',
+	'escape_char' => '"',
+	'sep_char'    => ',',
+	'binary'      => 1,
+});
+
+my $Recoder;
+if ($O{'a'})
+{
+	$Recoder = Locale::Recode->new(from=>$SourceCharset, to=>$DestCharset);
+}
+
+for ( my $Row = $Sheet->{MinRow} ; defined $Sheet->{MaxRow} && $Row <= $Sheet->{MaxRow} ; $Row++ )
+{
+	my @Row;
+	for ( my $Col = $Sheet->{MinCol} ; defined $Sheet->{MaxCol} && $Col <= $Sheet->{MaxCol} ; $Col++ )
+	{
+		my $Cell = $Sheet->{Cells}[$Row][$Col];
+		
+		my $Value = "";
+		if ($Cell)
+		{
+			$Value = $Cell->Value;
+			if ($Value eq 'GENERAL')
+			{
+				# Sometimes numbers are read incorrectly as "GENERAL".
+				# In this case, the correct value should be in ->{Val}.
+				$Value = $Cell->{Val};
+			}
+			if ($O{'a'})
+			{
+				$Recoder->recode($Value);
+			}
+		}
+		
+		# We assume the line is blank if there is nothing in the first column.
+		last if $Col == 0 and !$Value;
+		
+		push(@Row, $Value);
+	}
+	
+	last unless @Row;
+	
+	my $Status = $Csv->combine(@Row);
+	
+	
+	if (!$O{'q'} and !defined $Status)
+	{
+		my $Error = $Csv->error_input();
+		warn "ERROR FOUND!: $Error";
+	}
+	
+	if (defined $Status)
+	{
+		my $Line = $Csv->string();
+		print CSV "$Line\n";
+	}
+}
+
+close CSV;
+$IO->close;
+
+unless ($O{'q'})
+{
+	print "The spreadsheet has been converted to $DestCharset and saved as \"$DestFilename\".\n";
+}
+
+sub HELP_MESSAGE
+{
+	print STDERR << "EOF";
+
+xls2csv - Recode a spreadsheet's charset and save as CSV.
+
+usage: $0 [-xbcaqs] [--help]
+
+-x  : filename of the source spreadsheet
+-b  : the character set the source spreadsheet is in (before)
+-c  : the filename to save the generated csv file as
+-a  : the character set the csv file should be converted to (after)
+-q  : quiet mode
+-s  : print a list of supported character sets
+-h  : this help message
+
+example: $0 -x "spreadsheet.xls" -b WINDOWS-1252 -c "csvfile.csv" -a UTF-8
+
+More detailed help is in "man xls2csv"
+
+EOF
+	exit;
+}
+
+=head1 AUTHOR
+
+Ken Prows (perl@xev.net)
+
+=head1 COPYRIGHT
+
+Copyright (C) 2005 Ken Prows. All rights reserved.
+
+This module is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+
+=cut

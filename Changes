@@ -1,0 +1,10 @@
+Revision history for Perl script xls2csv.
+
+1.00 - 1.01  Fri Sep 23
+	- original version(s)
+		These were uploaded to CPAN as single pl files 
+		instead of an installable package..oops.
+
+1.02 Fri Sep 23
+	- Now distributed in a much nicer tar.gz package.
+
