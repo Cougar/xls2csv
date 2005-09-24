@@ -1,10 +1,10 @@
-xls2csv version 1.02
+xls2csv version 1.03
 ====================
 
 This will install the xls2csv script.
 
 You will be able to run the script from the command line as:
-xls2csv EXCEL_FILE CHARSET CSV_FILE CHARSET
+xls2csv -x EXCEL_FILE -b CHARSET -c CSV_FILE -a CHARSET
 
 See "perldoc xls2csv" for detailed help.
 
@@ -22,5 +22,5 @@ COPYRIGHT AND LICENCE
 Copyright (C) 2005 Ken Prows. (perl@xev.net)
 All rights reserved.
 
-This module is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+This script is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
 

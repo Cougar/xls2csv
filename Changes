@@ -1,10 +1,14 @@
 Revision history for Perl script xls2csv.
 
+1.03 Sat Sep 24
+	- Makefile.PL was requiring perl 5.8.6. This has been lowered to 5.6.0
+        - "-v" will now show the version
+        - Reading of the spreadsheet will now continue if a blank line is encountered.
+        
+1.02 Fri Sep 23
+        - Now distributed in a much nicer tar.gz package.
+
 1.00 - 1.01  Fri Sep 23
 	- original version(s)
 		These were uploaded to CPAN as single pl files 
 		instead of an installable package..oops.
-
-1.02 Fri Sep 23
-	- Now distributed in a much nicer tar.gz package.
-
