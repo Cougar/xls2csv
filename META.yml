@@ -1,7 +1,7 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         xls2csv
-version:      1.03
+version:      1.04
 version_from: script/xls2csv
 installdirs:  site
 requires:
@@ -9,6 +9,7 @@ requires:
     Spreadsheet::ParseExcel:       0
     Spreadsheet::ParseExcel::FmtUnicode: 0
     Text::CSV_XS:                  0
+    Unicode::Map:                  0
 
 distribution_type: module
 generated_by: ExtUtils::MakeMaker version 6.17

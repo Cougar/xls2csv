@@ -8,6 +8,7 @@ WriteMakefile(
     VERSION_FROM      => 'script/xls2csv', # finds $VERSION
     PREREQ_PM         => { 
 				'Locale::Recode' => 0,
+				'Unicode::Map' => 0,
 				'Spreadsheet::ParseExcel' => 0,
 				'Spreadsheet::ParseExcel::FmtUnicode' => 0,
 				'Text::CSV_XS' => 0,

@@ -1,5 +1,9 @@
 Revision history for Perl script xls2csv.
 
+1.04 Sun Sep 24
+    - After reviewing CPAN Testers reports, I realized that Makefile.PL should be specifying Unicode::Map as a prereq.
+        Now it does. Hopefully the test script won't die anymore.
+
 1.03 Sat Sep 24
 	- Makefile.PL was requiring perl 5.8.6. This has been lowered to 5.6.0
         - "-v" will now show the version
