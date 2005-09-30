@@ -1,6 +1,6 @@
 Revision history for Perl script xls2csv.
 
-1.05 Fri Sep 30
+1.06 Fri Sep 30
 	- Now works with multiple worksheets. The worksheet name may be specified with -w.
 	Can also now get a list of all the worksheets in a spreadsheet with the -W switch.
 	Thanks to David Sheldon for submitting the patch that added this functionality.

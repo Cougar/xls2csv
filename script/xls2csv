@@ -8,7 +8,7 @@ use Spreadsheet::ParseExcel;
 use Spreadsheet::ParseExcel::FmtUnicode;
 use Text::CSV_XS;
 
-our $VERSION = '1.05';
+our $VERSION = '1.06';
 
 =head1 NAME
 
@@ -119,7 +119,7 @@ if ($O{'W'})
 
 my $DestFilename = $O{'c'} || die "The filename to save the csv file as (-c) is required.";
 my $DestCharset = $O{'a'};
-$DestCharset = 'UTF-8' unless $DestCharset;
+$DestCharset = $SourceCharset unless $DestCharset;
 
 my $Sheet;
 if ($O{'w'}) 
@@ -231,7 +231,7 @@ sub HELP_MESSAGE
 
 xls2csv - Recode a spreadsheet's charset and save as CSV.
 
-usage: xls2csv -x spreadsheet.xls [-a charset] [-c csvfile.csv] [-bcaqshv]
+usage: xls2csv -x spreadsheet.xls [-w worksheet] [-b charset] [-c csvfile.csv] [-a charset] [-qshvW]
 
 -x  : filename of the source spreadsheet
 -b  : the character set the source spreadsheet is in (before)
