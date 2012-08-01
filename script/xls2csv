@@ -34,6 +34,12 @@ from clients that were being received in various character sets.
 	-v     : get version information
 	-W     : list worksheets in the spreadsheet specified by -x
 	-w     : specify the worksheet name to convert (defaults to the first worksheet)
+	-Q     : specify the char used for quoting fields containing blanks
+	         (defaults to the double-quote character <">)
+	-E     : specify the character used for escaping certain characters
+	         inside quoted fields (defaults to the double-quote mark <">)
+	-S     : specify the char used for separating fields, by default
+	         a comma
 
 =head1 EXAMPLE USAGE
 
@@ -76,7 +82,7 @@ You should probably make sure that no other programs are working with the spread
 $Getopt::Std::STANDARD_HELP_VERSION = 1;
 
 my %O;
-getopts('x:b:c:a:qshvWw:', \%O);
+getopts('x:b:c:a:qshvWw:Q:E:S:', \%O);
 HELP_MESSAGE() if !%O or $O{'h'};
 VERSION_MESSAGE() if $O{'v'};
 
@@ -121,6 +127,10 @@ my $DestFilename = $O{'c'} || die "The filename to save the csv file as (-c) is 
 my $DestCharset = $O{'a'};
 $DestCharset = $SourceCharset unless $DestCharset;
 
+my $QuoteChar = defined $O{'Q'} ? $O{'Q'} : '"';
+my $EscapeChar = defined $O{'E'} ? $O{'E'} : '"';
+my $SepChar = defined $O{'S'} ? $O{'S'} : '"';
+
 my $Sheet;
 if ($O{'w'}) 
 {
@@ -143,9 +153,9 @@ else
 open CSV, "> $DestFilename" || die "Cannot create csv file: $!" ;
 binmode CSV;
 my $Csv = Text::CSV_XS->new({
-	'quote_char'  => '"',
-	'escape_char' => '"',
-	'sep_char'    => ',',
+	'quote_char'  => $QuoteChar,
+	'escape_char' => $EscapeChar,
+	'sep_char'    => $SepChar,
 	'binary'      => 1,
 });
 
@@ -243,6 +253,11 @@ usage: xls2csv -x spreadsheet.xls [-w worksheet] [-b charset] [-c csvfile.csv] [
 -v  : get version information
 -W  : list worksheets in the spreadsheet specified by -x
 -w  : specify the worksheet name to convert (defaults to the first worksheet)
+-Q  : specify the char used for quoting fields containing blanks
+      (defaults to the double-quote character <">)
+-E  : specify the character used for escaping certain characters inside
+      quoted fields (defaults to the double-quote mark <">)
+-S  : specify the char used for separating fields, by default a comma
 
 example: xls2csv -x "spreadsheet.xls" -b WINDOWS-1252 -c "csvfile.csv" -a UTF-8
 
